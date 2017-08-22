@@ -29,3 +29,6 @@ incremental_db
 
 # ignore the generated PLL specification file
 PLLJ_PLLSPE_INFO.txt
+
+# Training and dataset 
+caffe/train
