@@ -1,6 +1,6 @@
 --------------------------------------------------------
 -- This file is generated with Haddoc2 utility 
--- Generated on : Tue Aug 22 18:16:58 2017
+-- Generated on : Mon Aug 28 15:30:08 2017
 --------------------------------------------------------
 
 library ieee;

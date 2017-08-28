@@ -2,13 +2,12 @@
 <node name="lenet5">
   <board name="dreamcam_c3">
     <ios>
-      <io name="mt9" driver="mt9">
-        <parts>
-          <part name="main" x_pos="0" y_pos="0"/>
-        </parts>
-        <flows>
-          <flow name="out" size="8"/>
-        </flows>
+      <io driver="mt9" name="mt9">
+        <clocks>
+          <clock typical="9000000" name="clk_img"/>
+          <clock typical="50000" name="clk_50k"/>
+          <clock typical="100000" name="clk_100k"/>
+        </clocks>
         <properties>
           <property name="enable" value=""/>
           <property name="roi1" value="">
@@ -39,44 +38,14 @@
             </properties>
           </property>
         </properties>
-        <clocks>
-          <clock name="clk_img" typical="9000000"/>
-        </clocks>
-      </io>
-      <io name="usb" driver="usb_cypress_CY7C68014A">
-        <parts>
-          <part name="inputs" x_pos="0" y_pos="0"/>
-          <part name="outputs" x_pos="0" y_pos="0"/>
-        </parts>
-        <components>
-          <component name="gp_com" desc="">
-            <files>
-              <file name="com_to_flow.vhd" type="vhdl" group="hdl" path="com_to_flow/src/com_to_flow.vhd"/>
-              <file name="fifo_com_rx.vhd" type="vhdl" group="hdl" path="com_to_flow/src/fifo_com_rx.vhd"/>
-              <file name="com_flow_fifo_rx.vhd" type="vhdl" group="hdl" path="com_to_flow/src/com_flow_fifo_rx.vhd"/>
-              <file name="read_flow_nbits.vhd" type="vhdl" group="hdl" path="com_to_flow/src/read_flow_nbits.vhd"/>
-              <file name="flow_to_com.vhd" type="vhdl" group="hdl" path="flow_to_com/src/flow_to_com.vhd"/>
-              <file name="fifo_com_tx.vhd" type="vhdl" group="hdl" path="flow_to_com/src/fifo_com_tx.vhd"/>
-              <file name="com_flow_fifo_tx.vhd" type="vhdl" group="hdl" path="flow_to_com/src/com_flow_fifo_tx.vhd"/>
-              <file name="write_flow.vhd" type="vhdl" group="hdl" path="flow_to_com/src/write_flow.vhd"/>
-              <file name="fv_signal_synchroniser.vhd" type="vhdl" group="hdl" path="flow_to_com/src/fv_signal_synchroniser.vhd"/>
-              <file name="flow_to_com_arb4.vhd" type="vhdl" group="hdl" path="flow_to_com/src/flow_to_com_arb4.vhd"/>
-              <file name="flowto16.vhd" type="vhdl" group="hdl" path="flow_to_com/src/flowto16.vhd"/>
-              <file name="com_to_master_pi.vhd" type="vhdl" group="hdl" path="com_to_master_pi/src/com_to_master_pi.vhd"/>
-              <file name="params_flow_decoder.vhd" type="vhdl" group="hdl" path="com_to_master_pi/src/params_flow_decoder.vhd"/>
-              <file name="ComFlow_pkg.vhd" type="vhdl" group="hdl" path="utils/src/ComFlow_pkg.vhd"/>
-              <file name="synchronizer.vhd" type="vhdl" group="hdl" path="utils/src/synchronizer.vhd"/>
-            </files>
-          </component>
-        </components>
         <flows>
-          <flow name="in0" size="8"/>
-          <flow name="in1" size="8"/>
-          <flow name="in2" size="8"/>
-          <flow name="in3" size="8"/>
-          <flow name="out0" size="8"/>
-          <flow name="out1" size="8"/>
+          <flow name="out" size="8"/>
         </flows>
+        <parts>
+          <part y_pos="124" x_pos="-487" name="main"/>
+        </parts>
+      </io>
+      <iocom driver="usb_cypress_CY7C68014A" name="usb">
         <params>
           <param name="IN0_NBWORDS" value="32768"/>
           <param name="IN1_NBWORDS" value="32768"/>
@@ -92,15 +61,23 @@
           <property name="enableflow3" value="1"/>
           <property name="enableflow4" value="1"/>
         </properties>
-      </io>
+        <flows>
+          <flow name="in0" size="8"/>
+          <flow name="in1" size="8"/>
+          <flow name="in2" size="8"/>
+          <flow name="in3" size="8"/>
+          <flow name="out0" size="8"/>
+          <flow name="out1" size="8"/>
+        </flows>
+        <parts>
+          <part y_pos="128" x_pos="46" name="inputs"/>
+          <part y_pos="-84" x_pos="48" name="outputs"/>
+        </parts>
+      </iocom>
     </ios>
   </board>
   <process>
-    <process name="lenet5" inlib="false" path="" driver="cnn.proc">
-      <flows>
-        <flow name="in" size="8"/>
-        <flow name="out" size="8"/>
-      </flows>
+    <process inlib="true" driver="cnn.proc" name="lenet5">
       <params>
         <param name="IMAGE_WIDTH" value="322"/>
       </params>
@@ -108,19 +85,23 @@
         <property name="enable" value="1"/>
         <property name="Selection" value="0"/>
       </properties>
+      <flows>
+        <flow name="in" size="8"/>
+        <flow name="out" size="8"/>
+      </flows>
+      <parts>
+        <part y_pos="329" x_pos="-315" name=""/>
+      </parts>
     </process>
   </process>
   <flow_interconnect>
     <connects>
-      <connect fromblock="mt9" fromflow="out" toblock="lenet5" toflow="in" order="msb"/>
-      <connect fromblock="mt9" fromflow="out" toblock="usb" toflow="in0" order="msb"/>
-      <connect fromblock="lenet5" fromflow="out" toblock="usb" toflow="in1" order="msb"/>
+      <connect fromflow="out" fromblock="mt9" toflow="in" toblock="lenet5" order="msb"/>
+      <connect fromflow="out" fromblock="mt9" toflow="in0" toblock="usb" order="msb"/>
+      <connect fromflow="out" fromblock="lenet5" toflow="in1" toblock="usb" order="msb"/>
     </connects>
   </flow_interconnect>
-  <clock_interconnect>
-    <domains>
-      <domain name="clk_proc" typical="50000000"/>
-    </domains>
-  </clock_interconnect>
-  <params_interconnect/>
+  <gpviewer>
+    <viewers/>
+  </gpviewer>
 </node>
