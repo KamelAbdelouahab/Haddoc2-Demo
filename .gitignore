@@ -30,7 +30,9 @@ incremental_db
 # ignore the generated PLL specification file
 PLLJ_PLLSPE_INFO.txt
 
-# Training and dataset
+# Test, Training and dataset
+*/test/*
+test*
 caffe/train
 
 # GPStudio
