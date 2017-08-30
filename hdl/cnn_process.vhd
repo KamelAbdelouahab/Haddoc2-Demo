@@ -1,4 +1,4 @@
--- This file has been automatically generated from file caffe/deploy/test.prototxt, on 2017-08-28 at 15:30:08
+-- This file has been automatically generated from file caffe/deploy/lenet_conv.prototxt, on 2017-08-28 at 15:45:41
 
 library ieee;
 use ieee.std_logic_1164.all;
