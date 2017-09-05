@@ -16,10 +16,7 @@
 
 library ieee;
 	use	ieee.std_logic_1164.all;
-	use ieee.std_logic_signed.all;
-    use ieee.math_real.all;
-
-
+	use ieee.numeric_std.all;
 library work;
 	use work.cnn_types.all;
 	use work.bitwidths.all;
@@ -91,12 +88,14 @@ architecture bhv of convElement is
 
                     -- Multiplication
                     mul_loop : for i in 0 to (KERNEL_SIZE * KERNEL_SIZE - 1) loop
-                        v_mul(i) := in_data(i) * KERNEL_VALUE(i);
+                        v_mul(i) := std_logic_vector(signed(in_data(i)) *
+						 							 signed(KERNEL_VALUE(i)));
                     end loop;
 
                     -- Accumulation
                     sum_loop : for i in 0 to (KERNEL_SIZE * KERNEL_SIZE - 1) loop
-                        v_sum := v_sum + v_mul(i);
+                        v_sum := std_logic_vector(signed(v_sum) +
+						 						  signed(v_mul(i)));
                     end loop;
 
                     -- Write in reg

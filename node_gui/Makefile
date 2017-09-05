@@ -1,5 +1,5 @@
 OUT_PWD := build/
-generate: /home/kamel/dev/demo-dloc/GPStudio/lenet5.node
+generate: /home/kamel/dev/demo-dloc/node_gui/demo.node
 	gpnode generate -o $(OUT_PWD) ${OPT}
 
 compile:

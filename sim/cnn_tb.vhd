@@ -111,19 +111,19 @@ begin
 		variable in_line : line;
 		variable in_pixelFromFile : INTEGER;
 		variable in_pixel_ok : BOOLEAN;
-	
+
 	begin
 		cnn_in_dv_s <= '0';
 		cnn_in_fv_s <= '0';
 		cnn_in_data_s <= (others=>'0');
-		
+
 		wait until starttb = '1';
 		wait until rising_edge(clk_proc);
 		wait until rising_edge(clk_proc);
-		
+
 		cnn_in_dv_s <= '1';
 		cnn_in_fv_s <= '1';
-		
+
 		while not endfile(in_data_file) loop
 			readline(in_data_file, in_line);
 			read(in_line, in_pixelFromFile, in_pixel_ok);
@@ -133,10 +133,10 @@ begin
 				read(in_line, in_pixelFromFile, in_pixel_ok);
 			end loop;
 		end loop;
-		
+
 		cnn_in_dv_s <= '0';
 		cnn_in_fv_s <= '0';
-		
+
 		wait;
 	end process;
 
@@ -144,18 +144,18 @@ begin
     out_process: process
 		variable out_line : line;
 		variable x : integer := 0;
-	
+
 	begin
 		endtb <= '0';
 		write(out_line, string'("P2"));
 		writeline(out_data_file, out_line);
-		
+
 		write(out_line, string'("320 320"));  -- change this to modify size of output picture
 		writeline(out_data_file, out_line);
-		
+
 		write(out_line, string'("255"));
 		writeline(out_data_file, out_line);
-		
+
 		wait until cnn_out_fv_s = '1';
 		while cnn_out_fv_s='1' loop
 			wait until rising_edge(clk_proc);
@@ -163,7 +163,7 @@ begin
 				write(out_line, to_integer(unsigned(cnn_out_data_s)));
 				write(out_line, string'(" "));
 				x := x + 1;
-				if(x>=128) then
+				if(x>=320) then
 					writeline(out_data_file, out_line);
 					x := 0;
 				end if;

@@ -4,7 +4,7 @@ PROCNAME = cnn
 TBNAME = $(PROCNAME)_tb
 OUTDIR = simbuild
 GHDL = ghdl
-GHDLFLAGS =-fexplicit --mb-comments --ieee=synopsys
+GHDLFLAGS = --ieee=synopsys -fexplicit --mb-comments
 
 QUARTUS_LIB = altera/13.1/quartus/eda/sim_lib/
 USEALTERA_MF = 0
@@ -37,10 +37,8 @@ SRC += cnn_slave.vhd
 SRC += cnn.vhd
 SRC += cnn_tb.vhd
 
-vpath %.vhd ../test
-vpath %.vhd ../haddocLib
 vpath %.vhd .
-vpath %.vhd ${QUARTUS_LIB}
+vpath %.vhd ../haddocLib
 
 OBJECTS := $(addprefix $(OUTDIR)/, $(notdir $(SRC:.vhd=.o)))
 
@@ -60,7 +58,7 @@ $(OUTDIR)/%.o: %.vhd
 $(OUTDIR)/$(TBNAME): $(OBJECTS)
 	cd $(OUTDIR) && $(GHDL) -e $(GHDLFLAGS) $(TBNAME)
 
-#GHDLRUNFLAGS += --stop-time=500ns # uncomment to limit simulation time
+# GHDLRUNFLAGS = --stop-time=500ns # uncomment to limit simulation time
 run : $(OUTDIR)/$(TBNAME) $(OUTDIR)/in.stim 
 	cd $(OUTDIR) && $(GHDL) -r $(TBNAME) $(GHDLRUNFLAGS) --vcd=$(PROCNAME).vcd
 

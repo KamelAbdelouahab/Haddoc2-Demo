@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <process name="cnn" categ="" pi_size_addr_rel="0" desc="">
+  <parts>
+    <part name="main">
+      <svg width="127" height="127">
+        <rect width="127" height="127" x="0" y="0" fill="lightgray"/>
+        <text x="50" y="50">CNN</text>
+      </svg>
+    </part>
+  </parts>
   <files>
+	<file name="bitwidths.vhd"          type="vhdl" group="hdl"      path="bitwidths.vhd"/>
     <file name="cnn_types.vhd"          type="vhdl" group="hdl"      path="../haddocLib/cnn_types.vhd"/>
-    <file name="bitwidths.vhd"          type="vhdl" group="hdl"      path="../hdl/bitwidths.vhd"/>
-    <file name="params.vhd"             type="vhdl" group="hdl"      path="../hdl/params.vhd"/>
+    <file name="params.vhd"             type="vhdl" group="hdl"      path="params.vhd"/>
     <file name="to_signedPixel.vhd"     type="vhdl" group="hdl"      path="../haddocLib/to_signedPixel.vhd"/>
     <file name="display_mux.vhd"        type="vhdl" group="hdl"      path="../haddocLib/display_mux.vhd"/>
     <file name="taps.vhd"               type="vhdl" group="hdl"      path="../haddocLib/taps.vhd"/>
@@ -17,7 +25,7 @@
     <file name="firstLayer.vhd"         type="vhdl" group="hdl"      path="../haddocLib/firstLayer.vhd"/>
     <file name="convLayer.vhd"          type="vhdl" group="hdl"      path="../haddocLib/convLayer.vhd"/>
     <file name="poolLayer.vhd"          type="vhdl" group="hdl"      path="../haddocLib/poolLayer.vhd"/>
-    <file name="cnn_process.vhd"        type="vhdl" group="hdl"      path="../hdl/cnn_process.vhd"/>
+    <file name="cnn_process.vhd"        type="vhdl" group="hdl"      path="cnn_process.vhd"/>
     <file name="cnn_slave.vhd"          type="vhdl" group="hdl"      path="cnn_slave.vhd"/>
     <file name="cnn.vhd"                type="vhdl" group="hdl"      path="cnn.vhd"/>
     <file name="cnn.proc"               type="proc" group="blockdef" path="cnn.proc"/>
@@ -30,11 +38,11 @@
   <flows>
     <flow name="in" size="8" type="in" desc="Input image to describe"/>
 
-    <flow name="out" size="8" type="out" desc="pool2">
+    <flow name="out" size="8" type="out" desc="conv1">
       <properties>
         <property name="datatype" type="flowtype" value="image"/>
-        <property name="width"    type="int"  value="79"/>
-        <property name="height"   type="int"  value="79"/>
+        <property name="width"    type="int"  value="320"/>
+        <property name="height"   type="int"  value="320"/>
       </properties>
   </flow>
   </flows>
@@ -50,7 +58,7 @@
 
   <properties>
     <property name="enable"      type="bool" value="false"                 desc="Enable or disable process"/>
-    <property name="Selection"   type="int"  value="0"     min="0" max="9" desc="Output to display"/>
+    <property name="Selection"   type="int"  value="0"     min="0" max="50" desc="Output to display"/>
   </properties>
 
 

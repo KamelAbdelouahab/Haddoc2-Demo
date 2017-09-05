@@ -35,5 +35,5 @@ PLLJ_PLLSPE_INFO.txt
 test*
 caffe/train
 
-# GPStudio
 */build
+*/simbuild
