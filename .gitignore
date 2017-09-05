@@ -30,10 +30,10 @@ incremental_db
 # ignore the generated PLL specification file
 PLLJ_PLLSPE_INFO.txt
 
-# Test, Training and dataset
-*/test/*
-test*
-caffe/train
-
+# Builds ...
 */build
 */simbuild
+
+# Generated files
+*/node
+*/sim
