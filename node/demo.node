@@ -2,47 +2,6 @@
 <node name="demo">
   <board name="dreamcam_c3">
     <ios>
-      <io name="mt9" driver="mt9">
-        <parts>
-          <part name="main" x_pos="0" y_pos="0"/>
-        </parts>
-        <flows>
-          <flow name="out" size="8"/>
-        </flows>
-        <properties>
-          <property name="enable" value=""/>
-          <property name="roi1" value="">
-            <properties>
-              <property name="x" value="320"/>
-              <property name="y" value="240"/>
-              <property name="w" value="644"/>
-              <property name="h" value="644"/>
-            </properties>
-          </property>
-          <property name="resolution" value=""/>
-          <property name="exposuretime" value="1000"/>
-          <property name="linelenght" value="1650"/>
-          <property name="flipx" value=""/>
-          <property name="flipy" value=""/>
-          <property name="binning" value="1"/>
-          <property name="autoexposure" value="">
-            <properties>
-              <property name="enable" value=""/>
-              <property name="target" value="1280"/>
-              <property name="min" value="1"/>
-              <property name="max" value="672"/>
-              <property name="stepmin" value="112"/>
-              <property name="stepmax" value="8"/>
-              <property name="dampofset" value="512"/>
-              <property name="dampgain" value="512"/>
-              <property name="dampmax" value="320"/>
-            </properties>
-          </property>
-        </properties>
-        <clocks>
-          <clock name="clk_img" typical="9000000"/>
-        </clocks>
-      </io>
       <io name="usb" driver="usb_cypress_CY7C68014A">
         <parts>
           <part name="inputs" x_pos="0" y_pos="0"/>
@@ -116,8 +75,8 @@
   </process>
   <flow_interconnect>
     <connects>
-      <connect fromblock="mt9" fromflow="out" toblock="lenet5" toflow="in" order="msb"/>
-      <connect fromblock="mt9" fromflow="out" toblock="usb" toflow="in0" order="msb"/>
+      <connect fromblock="usb" fromflow="out0" toblock="usb" toflow="in0" order="msb"/>
+      <connect fromblock="usb" fromflow="out1" toblock="lenet5" toflow="in" order="msb"/>
       <connect fromblock="lenet5" fromflow="out" toblock="usb" toflow="in1" order="msb"/>
     </connects>
   </flow_interconnect>

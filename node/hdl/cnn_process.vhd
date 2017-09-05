@@ -1,4 +1,4 @@
--- This file has been automatically generated from file caffe/deploy/test.prototxt, on 2017-08-28 at 15:48:10
+-- This file has been automatically generated from file caffe/lenet_feat_ext.prototxt, on 2017-09-05 at 11:58:00
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -165,6 +165,18 @@ architecture STRUCTURAL of cnn_process is
   signal conv1_dv : std_logic_vector(0 to CONV1_OUT_SIZE-1);
   signal conv1_fv : std_logic_vector(0 to CONV1_OUT_SIZE-1);
 
+  signal pool1_data : pixel_array(0 to POOL1_OUT_SIZE-1);
+  signal pool1_dv : std_logic_vector(0 to POOL1_OUT_SIZE-1);
+  signal pool1_fv : std_logic_vector(0 to POOL1_OUT_SIZE-1);
+
+  signal conv2_data : pixel_array(0 to CONV2_OUT_SIZE-1);
+  signal conv2_dv : std_logic_vector(0 to CONV2_OUT_SIZE-1);
+  signal conv2_fv : std_logic_vector(0 to CONV2_OUT_SIZE-1);
+
+  signal pool2_data : pixel_array(0 to POOL2_OUT_SIZE-1);
+  signal pool2_dv : std_logic_vector(0 to POOL2_OUT_SIZE-1);
+  signal pool2_fv : std_logic_vector(0 to POOL2_OUT_SIZE-1);
+
 
   -- STRUCTURAL DESCRIPTION
 
@@ -207,15 +219,76 @@ begin
       out_fv => conv1_fv
     );
 
-  display_mux_inst: display_mux
+  pool1: poolLayer
     generic map(
       PIXEL_SIZE => PIXEL_SIZE,
-      NB_IN_FLOWS => CONV1_OUT_SIZE
+      IMAGE_WIDTH => POOL1_IMAGE_WIDTH,
+      KERNEL_SIZE => POOL1_KERNEL_SIZE,
+      NB_OUT_FLOWS => POOL1_OUT_SIZE
     )
     port map(
+      clk => clk,
+      reset_n => reset_n,
+      enable => enable,
       in_data => conv1_data,
       in_dv => conv1_dv,
       in_fv => conv1_fv,
+      out_data => pool1_data,
+      out_dv => pool1_dv,
+      out_fv => pool1_fv
+    );
+
+  conv2: convLayer
+    generic map(
+      PIXEL_SIZE => PIXEL_SIZE,
+      IMAGE_WIDTH => CONV2_IMAGE_WIDTH,
+      KERNEL_SIZE => CONV2_KERNEL_SIZE,
+      NB_IN_FLOWS => CONV2_IN_SIZE,
+      NB_OUT_FLOWS => CONV2_OUT_SIZE,
+      KERNEL_VALUE => CONV2_KERNEL_VALUE,
+      KERNEL_NORM => CONV2_KERNEL_NORM,
+      BIAS_VALUE => CONV2_BIAS_VALUE
+    )
+    port map(
+      clk => clk,
+      reset_n => reset_n,
+      enable => enable,
+      in_data => pool1_data,
+      in_dv => pool1_dv,
+      in_fv => pool1_fv,
+      out_data => conv2_data,
+      out_dv => conv2_dv,
+      out_fv => conv2_fv
+    );
+
+  pool2: poolLayer
+    generic map(
+      PIXEL_SIZE => PIXEL_SIZE,
+      IMAGE_WIDTH => POOL2_IMAGE_WIDTH,
+      KERNEL_SIZE => POOL2_KERNEL_SIZE,
+      NB_OUT_FLOWS => POOL2_OUT_SIZE
+    )
+    port map(
+      clk => clk,
+      reset_n => reset_n,
+      enable => enable,
+      in_data => conv2_data,
+      in_dv => conv2_dv,
+      in_fv => conv2_fv,
+      out_data => pool2_data,
+      out_dv => pool2_dv,
+      out_fv => pool2_fv
+    );
+
+  display_mux_inst: display_mux
+    generic map(
+      PIXEL_SIZE => PIXEL_SIZE,
+      NB_IN_FLOWS => POOL2_OUT_SIZE
+    )
+    port map(
+      in_data => pool2_data,
+      in_dv => pool2_dv,
+      in_fv => pool2_fv,
       sel => select_i,
       out_data => out_data,
       out_dv => out_dv,

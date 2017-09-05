@@ -14,8 +14,8 @@ sys.path.insert(0, CAFFE_PYTHON_LIB)
 os.environ['GLOG_minloglevel'] = '2' # Supresses Display on console
 import caffe;
 
-proto = 'caffe/deploy/fc.prototxt';
-model = 'caffe/deploy/lenet.caffemodel';
+proto = 'caffe/lenet.prototxt';
+model = 'caffe/lenet.caffemodel';
 
 net = caffe.Net(proto,model,caffe.TEST);
 print 'Layer' + '\t|\t' + 'N' + '\t|\t' + 'Feature'

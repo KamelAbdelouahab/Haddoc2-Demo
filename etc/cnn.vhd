@@ -22,7 +22,12 @@ entity cnn is
         in_dv 		: in    std_logic;
         out_data    : out   std_logic_vector (OUT_SIZE - 1 downto 0);
         out_dv      : out   std_logic;
-        out_fv      : out   std_logic
+        out_fv      : out   std_logic;
+        addr_rel_i 	: in    std_logic_vector(1 downto 0);
+        wr_i 		: in    std_logic;
+        rd_i 		: in    std_logic;
+        datawr_i 	: in    std_logic_vector(31 downto 0);
+        datard_o 	: out   std_logic_vector(31 downto 0)
         );
 end cnn;
 
@@ -51,6 +56,17 @@ architecture rtl of cnn is
     end component;
 
     component cnn_slave
+    port(
+        clk_proc		: in std_logic;
+        reset_n			: in std_logic;
+        addr_rel_i		: in  std_logic_vector(1 downto 0);
+        wr_i			: in  std_logic;
+        rd_i			: in  std_logic;
+        datawr_i		: in  std_logic_vector(31 downto 0);
+        datard_o		: out std_logic_vector(31 downto 0);
+        select_o		: out std_logic_vector(31 downto 0);
+        enable_o		: out std_logic
+	);
     end component;
 
     --------------------------------------------------------------------------------
@@ -64,6 +80,18 @@ architecture rtl of cnn is
     -- STRUCTURAL DESCRIPTION
     --------------------------------------------------------------------------------
     begin
+        slave_inst : cnn_slave
+        port map(
+            clk_proc	  => clk_proc,
+            reset_n	      => reset_n,
+            addr_rel_i    => addr_rel_i,
+            wr_i		  => wr_i,
+            rd_i		  => rd_i,
+            datawr_i	  => datawr_i,
+            datard_o	  => datard_o,
+            select_o	  => select_s,
+            enable_o	  => enable_s
+        );
 
         proc_inst : cnn_process
         generic map (
@@ -74,9 +102,9 @@ architecture rtl of cnn is
         port map (
             clk 	      => clk_proc,
             reset_n 	  => reset_n,
-            enable        => '1',
+            enable        => enable_s,
             in_data       => in_data,
-            select_i      => "00000000000000000000000000000001",
+            select_i      => select_s,
             in_dv         => in_dv,
             in_fv         => in_fv,
             out_data      => out_data,
