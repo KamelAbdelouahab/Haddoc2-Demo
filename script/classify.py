@@ -41,15 +41,6 @@ def extractPatch(image,x,y,patchSize=30,tmpName='./tmpPatch.png'):
 	cv2.imwrite(tmpName,patch);
 	return tmpName;
 
-def caffeForward(imagePath,net,layerName='fc'):
-	caffe_image = caffe.io.load_image(imagePath)
-	net.blobs['data'].data[...]= caffe_image[:,:,0]
-	net.forward()
-	return net.blobs[layerName].data[0]
-
-def normalizeCaffe(value,scale_factor=127):
-	return np.array(scale_factor + scale_factor * value,dtype=int).astype("uint8");
-
 def normalizeHW(value,scale_factor=127):
     ## comp2
     if (value>scale_factor):
@@ -66,19 +57,10 @@ def reArrange (image,n):
     newImage = np.concatenate((image[:,n:width],image[:,0:n]),axis=1);
     return newImage;
 
-def saveAsP2(image,path):
-    size= image.shape
-    print size
-    with open (path,'w') as f:
-        f.write("P2\n")
-        f.write(str(size[0]) + " " + str(size[1]) + "\n")
-        f.write("255\n")
-        for x in range(size[0]):
-             for y in range(size[1]):
-                 f.write(str(image[x,y]))
-                 f.write(' ')
-             f.write('\n')
-    f.close()
+def caffeFCForward(data,net):
+	net.blobs['data'].data[...]= data
+	net.forward()
+	return net.blobs['prob'].data
 # ---------------------------------------------------------------
 if __name__ == '__main__':
     resultPath = 'img/'
@@ -88,9 +70,10 @@ if __name__ == '__main__':
     sample  = loadImage(samplePath);
 
     #  Load CNN
-    model   = 'caffe/lenet_feat_ext.prototxt'
-    kernels = 'caffe/lenet.caffemodel'
-    net = caffe.Net(model,kernels,caffe.TEST)
+    featExtModel    = 'caffe/lenet_feat_ext.prototxt'
+    classiferModel  = 'caffe/lenet_classifier.prototxt'
+    kernels 	    = 'caffe/lenet.caffemodel'
+    net = caffe.Net(featExtModel,kernels,caffe.TEST)
     features = net.blobs['pool2'].data[0,...];
     hw = np.zeros(features.shape)
 	
@@ -100,5 +83,12 @@ if __name__ == '__main__':
         for x in range(hw.shape[1]):
             for y in range(hw.shape[2]):
                 hw[neuron,x,y] = normalizeHW(hw[neuron,x,y]).astype("uint8");
-        saveImage(hw[neuron,:,:],resultPath + "/featureNorm" + str(neuron) + ".png")
+        saveImage(hw[neuron,:,:],resultPath + "/featNormed" + str(neuron) + ".png")
     
+	# Read featNormed
+	feature= np.zeros(16,6,6)
+	#~ dummyFeature = np.zeros(79,79)
+	for featIndex in range (0,16):
+		fileName = resultPath+"featNormed"+str(featIndex)+".png"
+		dummyFeature = loadImage(fileName);
+		feature[0,featIndex,:,:] = dummyFeature[0:6,0:6];
