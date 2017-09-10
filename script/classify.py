@@ -21,7 +21,7 @@ import caffe
 def loadImage(imagePath):
 	imageName = cv2.imread(imagePath);
 	imageName = cv2.cvtColor(imageName , cv2.COLOR_BGR2GRAY)
-	print (" >> Max value of %s is %d" %(imagePath,np.max(imageName)));
+	#~ print (" >> Max value of %s is %d" %(imagePath,np.max(imageName)));
 	return imageName.astype("uint8");
 
 def saveImage(imagePath,image):
@@ -36,18 +36,20 @@ def padImage(image,p):
 	pad_image = cv2.copyMakeBorder(image,p,p,p,p,cv2.BORDER_REPLICATE)
 	return pad_image
 
-def extractPatch(image,x,y,patchSize=30,tmpName='./tmpPatch.png'):
-	patch = image[x:x+patchSize , y:y+patchSize];
-	cv2.imwrite(tmpName,patch);
-	return tmpName;
+def extractPatch(data,x,y,patchSize=6):
+	patch = data[:,x:x+patchSize , y:y+patchSize];
+	return patch;
 
-def normalizeHW(value,scale_factor=127):
-    ## comp2
-    if (value>scale_factor):
-        s = np.array(value - 256);
-    else:
-        s=np.array(value);
-    return np.array(scale_factor + s - 1,dtype=int).astype("uint8");
+def normalizeHW(image,scale_factor=127):
+	for x in range(image.shape[0]):
+		for y in range(image.shape[1]):
+			pixelValue = image[x,y] # Coded as 2nd complement
+			if (pixelValue>scale_factor): # Negative pixel
+				s = pixelValue - 256; 
+			else:
+				s = pixelValue;
+			
+			return np.array((scale_factor + s - 1),dtype=float);
     # return np.array(scale_factor + value,dtype=int).astype("uint8");
 
 def reArrange (image,n):
@@ -57,38 +59,53 @@ def reArrange (image,n):
     newImage = np.concatenate((image[:,n:width],image[:,0:n]),axis=1);
     return newImage;
 
-def caffeFCForward(data,net):
+def caffeForward(data,net):
 	net.blobs['data'].data[...]= data
 	net.forward()
 	return net.blobs['prob'].data
 # ---------------------------------------------------------------
 if __name__ == '__main__':
-    resultPath = 'img/'
-    samplePath = 'img/sample.png'
-
-    # Load image to test
-    sample  = loadImage(samplePath);
+	resultPath = 'img/'
+	samplePath = 'img/sample.png'
+	
+	# Load image to test
+	sample  = loadImage(samplePath);
 
     #  Load CNN
-    featExtModel    = 'caffe/lenet_feat_ext.prototxt'
-    classiferModel  = 'caffe/lenet_classifier.prototxt'
-    kernels 	    = 'caffe/lenet.caffemodel'
-    net = caffe.Net(featExtModel,kernels,caffe.TEST)
-    features = net.blobs['pool2'].data[0,...];
-    hw = np.zeros(features.shape)
-	
-    # Normalize hw result and write into png
-    for neuron in range(features.shape[0]):
-        hw[neuron,:,:] = loadImage(resultPath + "/feature" + str(neuron) + ".png");
-        for x in range(hw.shape[1]):
-            for y in range(hw.shape[2]):
-                hw[neuron,x,y] = normalizeHW(hw[neuron,x,y]).astype("uint8");
-        saveImage(hw[neuron,:,:],resultPath + "/featNormed" + str(neuron) + ".png")
+	kernels 	    = 'caffe/lenet.caffemodel'
     
-	# Read featNormed
-	feature= np.zeros(16,6,6)
-	#~ dummyFeature = np.zeros(79,79)
-	for featIndex in range (0,16):
-		fileName = resultPath+"featNormed"+str(featIndex)+".png"
-		dummyFeature = loadImage(fileName);
-		feature[0,featIndex,:,:] = dummyFeature[0:6,0:6];
+    # Feature Extractor
+	featExtModel    = 'caffe/lenet_feat_ext.prototxt'
+	featExtNet 		= caffe.Net(featExtModel,kernels,caffe.TEST)
+	featBlob		= featExtNet.blobs['pool2'].data[0,...];
+    
+    # Classifier    
+	classiferModel  = 'caffe/lenet_classifier.prototxt'
+	classiferNet 	= caffe.Net(classiferModel,kernels,caffe.TEST)
+	featPatchBlob	= classiferNet.blobs['data'].data[0,...];
+	
+	feature 		= np.zeros(featBlob.shape);
+	featPatch		= np.zeros(featPatchBlob.shape)
+	
+	# Normalize hw results
+	for featureID in range(featBlob.shape[0]):
+		feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
+		feature[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
+	
+	# Input classifier
+	stride = 4;
+	patchSize=6;
+	featSize = 74; #Temporary
+	
+	
+	for x in xrange(0,featSize,stride):
+		for y in xrange(0,featSize,stride):		
+			featPatch = extractPatch(feature,x,y,patchSize=patchSize)
+			#~ print featPatch
+			#~ prob = caffeForward(featPatch,classiferNet)
+			#~ print prob.argmax()
+		#~ print (featPatch[featureID,:,:])
+	# FeedForward propgation in classifier
+	
+
+
