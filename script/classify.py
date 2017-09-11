@@ -94,28 +94,32 @@ if __name__ == '__main__':
 	
 	# Normalize hw results
 	for featureID in range(featBlob.shape[0]):
-		feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
+		#~ feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
+		feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
 		featureNormed[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
 		
 	
 	# Input classifier
-	stride = 8;
+	stride = 5;
 	patchSize=6;
-	featSize = 74; #Temporary
+	featSize = 79; #Temporary
 	predictions = [];
 	probs = [];
 	
-	for x in xrange(0,featSize,stride):
-		for y in xrange(0,featSize,stride):		
+	for y in xrange(0,featSize,stride):
+		print y
+		for x in xrange(0,featSize-5,stride):		
 			featPatch = extractPatch(featureNormed,x,y,patchSize=patchSize)
+			#~ print featPatch.shape
 			# FeedForward propgation in classifier
 			prob 		= caffeForward(featPatch,classiferNet)
 			prediction  = prob.argmax()
 			probs 		= np.append(probs,np.amax(prob))
 			predictions = np.append(predictions,prediction);
 	
+	#~ print probs
 	#~ print predictions.shape
-	predMapSize 	=10
+	predMapSize 	= np.sqrt(predictions.shape[0])
 	predictionMap 	= np.reshape(predictions,(predMapSize,predMapSize))
 	probaMap 		= np.reshape(probs,(predMapSize,predMapSize))
 	
