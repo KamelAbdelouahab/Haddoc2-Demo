@@ -19,18 +19,19 @@ sys.path.insert(0, CAFFE_ROOT +'/python')
 import caffe
 
 def loadImage(imagePath):
-	imageName = cv2.imread(imagePath);
-	imageName = cv2.cvtColor(imageName , cv2.COLOR_BGR2GRAY)
-	#~ print (" >> Max value of %s is %d" %(imagePath,np.max(imageName)));
-	return imageName.astype("uint8");
+	image = cv2.imread(imagePath);
+	image = cv2.cvtColor(image , cv2.COLOR_BGR2GRAY)
+	#~ print (" >> Max value of %s is %d" %(imagePath,np.max(image)));
+	return image;
 
 def saveImage(imagePath,image):
 	cv2.imwrite(image,imagePath);
 
 def showImage(image):
 	title = str(image)
-	plt.imshow(title, image)
-	plt.show()
+	cv2.imshow(title, image)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 
 def padImage(image,p):
 	pad_image = cv2.copyMakeBorder(image,p,p,p,p,cv2.BORDER_REPLICATE)
@@ -43,14 +44,16 @@ def extractPatch(data,x,y,patchSize=6):
 def normalizeHW(image,scale_factor=127):
 	for x in range(image.shape[0]):
 		for y in range(image.shape[1]):
-			pixelValue = image[x,y] # Coded as 2nd complement
+			pixelValue = image[x,y] # Coded as 2 complement
 			if (pixelValue>scale_factor): # Negative pixel
-				s = pixelValue - 256; 
+				s = pixelValue - 256.0; 
 			else:
 				s = pixelValue;
 			
-			return np.array((scale_factor + s - 1),dtype=float);
-    # return np.array(scale_factor + value,dtype=int).astype("uint8");
+			image[x,y] = scale_factor + s - 1.0
+			#~ print image.dtype
+	return np.true_divide(image,scale_factor);
+    
 
 def reArrange (image,n):
     width = image.shape[1];
@@ -63,6 +66,7 @@ def caffeForward(data,net):
 	net.blobs['data'].data[...]= data
 	net.forward()
 	return net.blobs['prob'].data
+	
 # ---------------------------------------------------------------
 if __name__ == '__main__':
 	resultPath = 'img/'
@@ -84,28 +88,41 @@ if __name__ == '__main__':
 	classiferNet 	= caffe.Net(classiferModel,kernels,caffe.TEST)
 	featPatchBlob	= classiferNet.blobs['data'].data[0,...];
 	
-	feature 		= np.zeros(featBlob.shape);
+	feature 		= np.zeros(featBlob.shape,dtype=int).astype('uint8');
+	featureNormed	= np.zeros(featBlob.shape,dtype=float)
 	featPatch		= np.zeros(featPatchBlob.shape)
 	
 	# Normalize hw results
 	for featureID in range(featBlob.shape[0]):
 		feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
-		feature[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
+		featureNormed[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
+		
 	
 	# Input classifier
-	stride = 4;
+	stride = 8;
 	patchSize=6;
 	featSize = 74; #Temporary
-	
+	predictions = [];
+	probs = [];
 	
 	for x in xrange(0,featSize,stride):
 		for y in xrange(0,featSize,stride):		
-			featPatch = extractPatch(feature,x,y,patchSize=patchSize)
-			#~ print featPatch
-			#~ prob = caffeForward(featPatch,classiferNet)
-			#~ print prob.argmax()
-		#~ print (featPatch[featureID,:,:])
-	# FeedForward propgation in classifier
+			featPatch = extractPatch(featureNormed,x,y,patchSize=patchSize)
+			# FeedForward propgation in classifier
+			prob 		= caffeForward(featPatch,classiferNet)
+			prediction  = prob.argmax()
+			probs 		= np.append(probs,np.amax(prob))
+			predictions = np.append(predictions,prediction);
+	
+	#~ print predictions.shape
+	predMapSize 	=10
+	predictionMap 	= np.reshape(predictions,(predMapSize,predMapSize))
+	probaMap 		= np.reshape(probs,(predMapSize,predMapSize))
+	
+	print predictionMap.astype('uint8');		
+	print np.array_str(probaMap, precision=1, suppress_small=True)		
+
+	
 	
 
 
