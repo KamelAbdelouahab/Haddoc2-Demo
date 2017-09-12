@@ -95,10 +95,14 @@ if __name__ == '__main__':
 	
 	# Normalize hw results
 	for featureID in range(featBlob.shape[0]):
-		feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
-		#~ feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
+		#~ feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
+		feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
 		featureNormed[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
-		featureNormed[featureID,:,:] = reArrange(featureNormed[featureID,:,:],1);
+		# BUG : Output image is instable and sometimes is shifted 1 pixel on the right
+		# Temporary Patch : Odd features are shifted
+		#~ if (featureID % 2 ==1 ):
+			#~ print "neuron "+str(featureID)+" was shifted"
+			#~ featureNormed[featureID,:,:] = reArrange(featureNormed[featureID,:,:],1);
 		
 	
 	# Input classifier
@@ -121,8 +125,11 @@ if __name__ == '__main__':
 	hwPredictionMap = np.reshape(hwPredictions,(hwPredMapSize,hwPredMapSize)).T
 	hwProbaMap 		= np.reshape(hwProbs,(hwPredMapSize,hwPredMapSize)).T
 	
+	labels = np.load('/home/kamel/dev/demo-dloc/img/label.npy');
+	labels = np.reshape(labels,(hwPredMapSize,hwPredMapSize)).T
+	
 	# --------------------------------------------------------------------------------------
-	# Test Software implementation 
+	#~ # Test Software implementation 
 	deployModel    = 'caffe/lenet.prototxt'
 	deployNet 		= caffe.Net(deployModel,kernels,caffe.TEST)
 	stride = 28;
@@ -147,14 +154,13 @@ if __name__ == '__main__':
 	
 	
 	# Display Results
-	labels = np.load('/home/kamel/dev/demo-dloc/img/label.npy');
-	labels = np.reshape(labels,(swPredMapSize,swPredMapSize)).T
+
 	
 	print "Classifications of Software Caffe:"
 	print swPredictionMap.astype('uint8');	
 	print 'True Positive Rate = ' + str(tpr(labels,swPredictionMap))
 	print '----------------------------------------'
-	print "Classifications of Hardware accelerator"
+	print "Classifications of Hardware Accelerator: "
 	print hwPredictionMap.astype('uint8');			
 	print 'True Positive Rate = ' + str(tpr(labels,hwPredictionMap))
 

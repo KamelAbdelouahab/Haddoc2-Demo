@@ -31,6 +31,7 @@ def showImage(image):
 
 if __name__ == '__main__':
 	samplePath = '/home/kamel/dev/demo-dloc/img/sample.png'
+	samplePathPGM = '/home/kamel/dev/demo-dloc/img/sample.img'
 	labelPath = '/home/kamel/dev/demo-dloc/img/label.npy'
 	kernels  = '/home/kamel/caffe/examples/mnist/lenet_iter_10000.caffemodel'
 	cnnModel = '/home/kamel/caffe/examples/mnist/lenet_train_test.prototxt'
@@ -52,6 +53,7 @@ if __name__ == '__main__':
 	img = (255*img).astype('uint8');
 	img = cv2.copyMakeBorder(img,1,1,1,1,cv2.BORDER_REPLICATE)
 	cv2.imwrite(samplePath,img);
+	np.savetxt(samplePathPGM,img,fmt='%i');
 
 
 	# Labels

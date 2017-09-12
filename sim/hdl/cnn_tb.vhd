@@ -146,7 +146,7 @@ architecture tb of cnn_tb is
 		write(out_line, string'("P2"));
 		writeline(out_data_file, out_line);
 
-		write(out_line, string'("79 79"));
+		write(out_line, string'("69 69"));
 		writeline(out_data_file, out_line);
 
 		write(out_line, string'("255"));

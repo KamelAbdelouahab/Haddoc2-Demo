@@ -1,6 +1,6 @@
 --------------------------------------------------------
 -- This file is generated with Haddoc2 utility 
--- Generated on : Mon Sep 11 10:09:38 2017
+-- Generated on : Tue Sep 12 10:14:59 2017
 --------------------------------------------------------
 
 library ieee;
@@ -9,7 +9,7 @@ library work;
 	use	work.cnn_types.all;
 package params is
 --CONV1
-constant CONV1_IMAGE_WIDTH  :  integer := 322 ;
+constant CONV1_IMAGE_WIDTH  :  integer := 282 ;
 constant CONV1_IN_SIZE      :  integer := 1 ;
 constant CONV1_OUT_SIZE     :  integer := 8 ;
 constant CONV1_KERNEL_SIZE  :  integer := 3 ;
@@ -29,12 +29,12 @@ constant CONV1_KERNEL_VALUE :  pixel_matrix  (0 to CONV1_IN_SIZE * CONV1_OUT_SIZ
  );
 ------------------------------------------------------------------------------------------------------------------
 --POOL1
-constant POOL1_IMAGE_WIDTH  :  integer := 320 ;
+constant POOL1_IMAGE_WIDTH  :  integer := 280 ;
 constant POOL1_OUT_SIZE     :  integer := 8 ;
 constant POOL1_KERNEL_SIZE  :  integer := 2 ;
 ------------------------------------------------------------------------------------------------------------------
 --CONV2
-constant CONV2_IMAGE_WIDTH  :  integer := 160 ;
+constant CONV2_IMAGE_WIDTH  :  integer := 140 ;
 constant CONV2_IN_SIZE      :  integer := 8 ;
 constant CONV2_OUT_SIZE     :  integer := 16 ;
 constant CONV2_KERNEL_SIZE  :  integer := 3 ;
@@ -174,7 +174,7 @@ constant CONV2_KERNEL_VALUE :  pixel_matrix  (0 to CONV2_IN_SIZE * CONV2_OUT_SIZ
  );
 ------------------------------------------------------------------------------------------------------------------
 --POOL2
-constant POOL2_IMAGE_WIDTH  :  integer := 158 ;
+constant POOL2_IMAGE_WIDTH  :  integer := 138 ;
 constant POOL2_OUT_SIZE     :  integer := 16 ;
 constant POOL2_KERNEL_SIZE  :  integer := 2 ;
 ------------------------------------------------------------------------------------------------------------------
