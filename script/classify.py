@@ -9,10 +9,6 @@ import matplotlib.pyplot as plt
 sys.path.append('/usr/local/lib/python2.7/dist-packages')
 import cv2
 
-# SSIM Metric
-from skimage.measure import compare_ssim as ssim
-from skimage.measure import compare_psnr as psnr
-
 # Import Caffe, pyCaffe
 CAFFE_ROOT		= os.environ['CAFFE_ROOT']
 sys.path.insert(0, CAFFE_ROOT +'/python')
@@ -38,7 +34,10 @@ def padImage(image,p):
 	return pad_image
 
 def extractPatch(data,x,y,patchSize=6):
-	patch = data[:,x:x+patchSize , y:y+patchSize];
+	if (data.ndim ==3):
+		patch = data[:,x:x+patchSize , y:y+patchSize];
+	else:
+		patch = data[x:x+patchSize , y:y+patchSize];
 	return patch;
 
 def normalizeHW(image,scale_factor=127):
@@ -57,8 +56,6 @@ def normalizeHW(image,scale_factor=127):
 
 def reArrange (image,n):
     width = image.shape[1];
-    print image[:,n:width].shape
-    print image[:,0:n].shape
     newImage = np.concatenate((image[:,n:width],image[:,0:n]),axis=1);
     return newImage;
 
@@ -66,16 +63,25 @@ def caffeForward(data,net):
 	net.blobs['data'].data[...]= data
 	net.forward()
 	return net.blobs['prob'].data
-	
+
+def tpr(A,B):
+    tp = 0;
+    a = A.flatten();
+    b = B.flatten();
+    for i in range(a.shape[0]):
+        if (a[i] == b[i]):
+            tp = tp + 1;
+    return tp;	
 # ---------------------------------------------------------------
 if __name__ == '__main__':
 	resultPath = 'img/'
 	samplePath = 'img/sample.png'
 	
+	# Test Hardware Implementation
 	# Load image to test
 	sample  = loadImage(samplePath);
 
-    #  Load CNN
+    #  Load Kernels
 	kernels 	    = 'caffe/lenet.caffemodel'
     
     # Feature Extractor
@@ -94,39 +100,66 @@ if __name__ == '__main__':
 	
 	# Normalize hw results
 	for featureID in range(featBlob.shape[0]):
-		#~ feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
-		feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
+		feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
+		#~ feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
 		featureNormed[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
+		featureNormed[featureID,:,:] = reArrange(featureNormed[featureID,:,:],1);
 		
 	
 	# Input classifier
-	stride = 5;
+	stride = 7;
 	patchSize=6;
-	featSize = 79; #Temporary
+	featSize = 69; #Temporary
 	predictions = [];
 	probs = [];
 	
 	for y in xrange(0,featSize,stride):
-		print y
-		for x in xrange(0,featSize-5,stride):		
+		for x in xrange(0,featSize,stride):		
 			featPatch = extractPatch(featureNormed,x,y,patchSize=patchSize)
-			#~ print featPatch.shape
 			# FeedForward propgation in classifier
 			prob 		= caffeForward(featPatch,classiferNet)
 			prediction  = prob.argmax()
 			probs 		= np.append(probs,np.amax(prob))
 			predictions = np.append(predictions,prediction);
 	
-	#~ print probs
-	#~ print predictions.shape
-	predMapSize 	= np.sqrt(predictions.shape[0])
-	predictionMap 	= np.reshape(predictions,(predMapSize,predMapSize))
-	probaMap 		= np.reshape(probs,(predMapSize,predMapSize))
+	predMapSize 	= 10
+	predictionMap 	= np.reshape(predictions,(predMapSize,predMapSize)).T
+	probaMap 		= np.reshape(probs,(predMapSize,predMapSize)).T
 	
 	print predictionMap.astype('uint8');		
 	print np.array_str(probaMap, precision=1, suppress_small=True)		
 
-	
-	
+	#~ labels = np.load('/home/kamel/dev/demo-dloc/img/label.npy');
+	#~ labels = np.reshape(labels,(predMapSize,predMapSize))
+	#~ print labels
+	#~ print tpr(labels,predictionMap)
 
+	# --------------------------------------------------------------------------------------
+	# Test Software implementation 
+	deployModel    = 'caffe/lenet.prototxt'
+	deployNet 		= caffe.Net(deployModel,kernels,caffe.TEST)
+	# Input classifier
+	stride = 28;
+	patchSize=28;
+	sampleSize = sample.shape[0]-2; #Temporary
+	swPredictions = [];
+	swProbs = [];
+	
+	sampleNormed = np.true_divide(sample,255)
+	for y in xrange(0,sampleSize,stride):
+		for x in xrange(0,sampleSize,stride):		
+			samplePatch = extractPatch(sampleNormed,x,y,patchSize=patchSize)
+			# FeedForward propgation in classifier
+			swProb 		  = caffeForward(samplePatch,deployNet)
+			swPrediction  = swProb.argmax()
+			swProbs 	  = np.append(swProbs,np.amax(swProb))
+			swPredictions = np.append(swPredictions,swPrediction);	
+	
+	print swPredictions.shape
+	swPredMapSize 	= 10
+	swPredictionMap = np.reshape(swPredictions,(predMapSize,predMapSize)).T
+	swProbaMap 		= np.reshape(swProbs,(predMapSize,predMapSize)).T
+	
+	print swPredictionMap.astype('uint8');		
+	print np.array_str(swProbaMap, precision=1, suppress_small=True)		
 
