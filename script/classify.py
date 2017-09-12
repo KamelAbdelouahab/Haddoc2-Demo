@@ -65,13 +65,8 @@ def caffeForward(data,net):
 	return net.blobs['prob'].data
 
 def tpr(A,B):
-    tp = 0;
-    a = A.flatten();
-    b = B.flatten();
-    for i in range(a.shape[0]):
-        if (a[i] == b[i]):
-            tp = tp + 1;
-    return tp;	
+    r = (A==B)
+    return r.sum()
 # ---------------------------------------------------------------
 if __name__ == '__main__':
 	resultPath = 'img/'
@@ -110,35 +105,26 @@ if __name__ == '__main__':
 	stride = 7;
 	patchSize=6;
 	featSize = 69; #Temporary
-	predictions = [];
-	probs = [];
+	hwPredictions = [];
+	hwProbs = [];
 	
 	for y in xrange(0,featSize,stride):
 		for x in xrange(0,featSize,stride):		
 			featPatch = extractPatch(featureNormed,x,y,patchSize=patchSize)
 			# FeedForward propgation in classifier
-			prob 		= caffeForward(featPatch,classiferNet)
-			prediction  = prob.argmax()
-			probs 		= np.append(probs,np.amax(prob))
-			predictions = np.append(predictions,prediction);
+			hwProb			= caffeForward(featPatch,classiferNet)
+			hwPrediction	= hwProb.argmax()
+			hwProbs 		= np.append(hwProbs,np.amax(hwProb))
+			hwPredictions 	= np.append(hwPredictions,hwPrediction);
 	
-	predMapSize 	= 10
-	predictionMap 	= np.reshape(predictions,(predMapSize,predMapSize)).T
-	probaMap 		= np.reshape(probs,(predMapSize,predMapSize)).T
+	hwPredMapSize 	= 10
+	hwPredictionMap = np.reshape(hwPredictions,(hwPredMapSize,hwPredMapSize)).T
+	hwProbaMap 		= np.reshape(hwProbs,(hwPredMapSize,hwPredMapSize)).T
 	
-	print predictionMap.astype('uint8');		
-	print np.array_str(probaMap, precision=1, suppress_small=True)		
-
-	#~ labels = np.load('/home/kamel/dev/demo-dloc/img/label.npy');
-	#~ labels = np.reshape(labels,(predMapSize,predMapSize))
-	#~ print labels
-	#~ print tpr(labels,predictionMap)
-
 	# --------------------------------------------------------------------------------------
 	# Test Software implementation 
 	deployModel    = 'caffe/lenet.prototxt'
 	deployNet 		= caffe.Net(deployModel,kernels,caffe.TEST)
-	# Input classifier
 	stride = 28;
 	patchSize=28;
 	sampleSize = sample.shape[0]-2; #Temporary
@@ -155,11 +141,22 @@ if __name__ == '__main__':
 			swProbs 	  = np.append(swProbs,np.amax(swProb))
 			swPredictions = np.append(swPredictions,swPrediction);	
 	
-	print swPredictions.shape
 	swPredMapSize 	= 10
-	swPredictionMap = np.reshape(swPredictions,(predMapSize,predMapSize)).T
-	swProbaMap 		= np.reshape(swProbs,(predMapSize,predMapSize)).T
+	swPredictionMap = np.reshape(swPredictions,(swPredMapSize,swPredMapSize)).T
+	swProbaMap 		= np.reshape(swProbs,(swPredMapSize,swPredMapSize)).T
 	
-	print swPredictionMap.astype('uint8');		
-	print np.array_str(swProbaMap, precision=1, suppress_small=True)		
+	
+	# Display Results
+	labels = np.load('/home/kamel/dev/demo-dloc/img/label.npy');
+	labels = np.reshape(labels,(swPredMapSize,swPredMapSize)).T
+	
+	print "Classifications of Software Caffe:"
+	print swPredictionMap.astype('uint8');	
+	print 'True Positive Rate = ' + str(tpr(labels,swPredictionMap))
+	print '----------------------------------------'
+	print "Classifications of Hardware accelerator"
+	print hwPredictionMap.astype('uint8');			
+	print 'True Positive Rate = ' + str(tpr(labels,hwPredictionMap))
+
+	
 

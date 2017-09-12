@@ -31,6 +31,7 @@ def showImage(image):
 
 if __name__ == '__main__':
 	samplePath = '/home/kamel/dev/demo-dloc/img/sample.png'
+	labelPath = '/home/kamel/dev/demo-dloc/img/label.npy'
 	kernels  = '/home/kamel/caffe/examples/mnist/lenet_iter_10000.caffemodel'
 	cnnModel = '/home/kamel/caffe/examples/mnist/lenet_train_test.prototxt'
 	cnnNet = caffe.Net(cnnModel,kernels,caffe.TEST)
@@ -50,5 +51,9 @@ if __name__ == '__main__':
 	#~ img = np.reshape(testData,(img.shape[0],img.shape[1]),order='A')
 	img = (255*img).astype('uint8');
 	img = cv2.copyMakeBorder(img,1,1,1,1,cv2.BORDER_REPLICATE)
-	print img.shape
 	cv2.imwrite(samplePath,img);
+
+
+	# Labels
+	cnnLabels = cnnNet.blobs['label'].data.astype("uint8");
+	np.save(labelPath, cnnLabels)
