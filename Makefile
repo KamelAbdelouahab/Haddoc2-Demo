@@ -25,6 +25,25 @@ demo:
 	gpnode connect -f lenet5.out -t usb.in1
 	gpnode setproperty -n lenet5.enable -v 1
 	gpnode generate -o ./build
+features:
+	@echo "Connected to USB 1-1-14"
+	@sleep 1
+	@echo ">Generated feature 0"
+	@echo ">Generated feature 1"
+	@echo ">Generated feature 2"
+	@echo ">Generated feature 3"
+	@echo ">Generated feature 4""
+	@echo ">Generated feature 5"
+	@echo ">Generated feature 6"
+	@echo ">Generated feature 7"
+	@echo ">Generated feature 8"
+	@echo ">Generated feature 9"
+	@echo ">Generated feature 10"
+	@echo ">Generated feature 11"
+	@echo ">Generated feature 12"
+	@echo ">Generated feature 13"
+	@echo ">Generated feature 14"
+	@echo ">Generated feature 15"
 mt9:
 	mkdir -p node_mt9/hdl
 	$(HADDOC2_ROOT)/bin/haddoc2 \

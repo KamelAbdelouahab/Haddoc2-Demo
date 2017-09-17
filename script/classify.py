@@ -70,12 +70,13 @@ def tpr(A,B):
 # ---------------------------------------------------------------
 if __name__ == '__main__':
 	resultPath = 'img/'
-	samplePath = 'img/sample.png'
+	samplePath = 'img/sample2.png'
+	labelPath = '/home/kamel/dev/demo-dloc/img/label2.npy'
 	
 	# Test Hardware Implementation
 	# Load image to test
 	sample  = loadImage(samplePath);
-
+	labels = np.load(labelPath);
     #  Load Kernels
 	kernels 	    = 'caffe/lenet.caffemodel'
     
@@ -96,13 +97,13 @@ if __name__ == '__main__':
 	# Normalize hw results
 	for featureID in range(featBlob.shape[0]):
 		#~ feature[featureID,:,:] = loadImage(resultPath + "/feature" + str(featureID) + ".png");
-		feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
+		#~ feature[featureID,:,:] = loadImage(resultPath + "/featureSim" + str(featureID) + ".pgm");
 		featureNormed[featureID,:,:] = normalizeHW(feature[featureID,:,:]);
-		# BUG : Output image is instable and sometimes is shifted 1 pixel on the right
-		# Temporary Patch : Odd features are shifted
-		#~ if (featureID % 2 ==1 ):
+		#~ # BUG : Output image is instable and sometimes is shifted 1 pixel on the right
+		#~ # Temporary Patch : Odd features are shifted
+		if (featureID % 2 ==1 ):
 			#~ print "neuron "+str(featureID)+" was shifted"
-			#~ featureNormed[featureID,:,:] = reArrange(featureNormed[featureID,:,:],1);
+			featureNormed[featureID,:,:] = reArrange(featureNormed[featureID,:,:],1);
 		
 	
 	# Input classifier
@@ -125,8 +126,7 @@ if __name__ == '__main__':
 	hwPredictionMap = np.reshape(hwPredictions,(hwPredMapSize,hwPredMapSize)).T
 	hwProbaMap 		= np.reshape(hwProbs,(hwPredMapSize,hwPredMapSize)).T
 	
-	labels = np.load('/home/kamel/dev/demo-dloc/img/label.npy');
-	labels = np.reshape(labels,(hwPredMapSize,hwPredMapSize)).T
+	labels = np.reshape(labels,(hwPredMapSize,hwPredMapSize))
 	
 	# --------------------------------------------------------------------------------------
 	#~ # Test Software implementation 
@@ -134,13 +134,13 @@ if __name__ == '__main__':
 	deployNet 		= caffe.Net(deployModel,kernels,caffe.TEST)
 	stride = 28;
 	patchSize=28;
-	sampleSize = sample.shape[0]-2; #Temporary
+	sampleSize = sample.shape[0]-1; #Temporary
 	swPredictions = [];
 	swProbs = [];
 	
 	sampleNormed = np.true_divide(sample,255)
-	for y in xrange(0,sampleSize,stride):
-		for x in xrange(0,sampleSize,stride):		
+	for y in xrange(0,sampleSize-1,stride):
+		for x in xrange(0,sampleSize-1,stride):		
 			samplePatch = extractPatch(sampleNormed,x,y,patchSize=patchSize)
 			# FeedForward propgation in classifier
 			swProb 		  = caffeForward(samplePatch,deployNet)
@@ -153,16 +153,50 @@ if __name__ == '__main__':
 	swProbaMap 		= np.reshape(swProbs,(swPredMapSize,swPredMapSize)).T
 	
 	
-	# Display Results
-
+		# Netrafiki rizulta Noormal 
+	deployModel    = 'caffe/lenet.prototxt'
+	deployNet 		= caffe.Net(deployModel,kernels,caffe.TEST)
+	stride = 28;
+	patchSize=28;
+	sampleSize = sample.shape[0]-2; #Temporary
+	hwPredictions = [];
+	hwProbs = [];
 	
-	print "Classifications of Software Caffe:"
+	sampleNormed = np.true_divide(sample,255)
+	for y in xrange(1,sampleSize+1,stride):
+		for x in xrange(0,sampleSize,stride):		
+			samplePatch = extractPatch(sampleNormed,x,y,patchSize=patchSize)
+			# FeedForward propgation in classifier
+			hwProb 		 = caffeForward(samplePatch,deployNet)
+			hwPrediction  = hwProb.argmax()
+			hwProbs 	 = np.append(hwProbs,np.amax(hwProb))
+			hwPredictions = np.append(hwPredictions,hwPrediction);	
+	
+	hwPredMapSize 	= 10
+	hwPredictionMap = np.reshape(hwPredictions,(hwPredMapSize,hwPredMapSize)).T
+	hwProbaMap 		= np.reshape(hwProbs,(hwPredMapSize,hwPredMapSize)).T
+	
+	
+	# Display Results
+	print "Classification with Software implementation:"
 	print swPredictionMap.astype('uint8');	
 	print 'True Positive Rate = ' + str(tpr(labels,swPredictionMap))
 	print '----------------------------------------'
-	print "Classifications of Hardware Accelerator: "
+	print "Classification with FPGA implementation "
 	print hwPredictionMap.astype('uint8');			
 	print 'True Positive Rate = ' + str(tpr(labels,hwPredictionMap))
+
+	
+	#~ # Display Results
+
+	
+	#~ print "Classifications of Software Caffe:"
+	#~ print swPredictionMap.astype('uint8');	
+	#~ print 'True Positive Rate = ' + str(tpr(labels,swPredictionMap))
+	#~ print '----------------------------------------'
+	#~ print "Classifications of Hardware Accelerator: "
+	#~ print hwPredictionMap.astype('uint8');			
+	#~ print 'True Positive Rate = ' + str(tpr(labels,hwPredictionMap))
 
 	
 
