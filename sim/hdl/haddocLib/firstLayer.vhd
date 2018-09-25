@@ -22,7 +22,7 @@ library work;
 
 entity firstLayer is
     generic(
-        PIXEL_SIZE    :   integer;
+        BITWIDTH    :   integer;
         IMAGE_WIDTH   :   integer;
         KERNEL_SIZE   :   integer;
         NB_OUT_FLOWS  :   integer;
@@ -35,7 +35,7 @@ entity firstLayer is
         clk	          :   in  std_logic;
         reset_n	      :   in  std_logic;
         enable        :   in  std_logic;
-        in_data       :   in  std_logic_vector (0 to PIXEL_SIZE - 1);
+        in_data       :   in  std_logic_vector (0 to BITWIDTH - 1);
         in_dv         :   in  std_logic;
         in_fv         :   in  std_logic;
         out_data      :   out pixel_array      (0 to NB_OUT_FLOWS - 1);
@@ -50,7 +50,7 @@ architecture STRUCTURAL of firstLayer is
     --------------------------------------------------------------------------------
     component neighExtractor
     generic(
-		PIXEL_SIZE      :   integer;
+		BITWIDTH      :   integer;
 		IMAGE_WIDTH     :   integer;
 		KERNEL_SIZE     :   integer
 	);
@@ -59,7 +59,7 @@ architecture STRUCTURAL of firstLayer is
 		clk	            :	in 	std_logic;
         reset_n	        :	in	std_logic;
         enable	        :	in	std_logic;
-        in_data         :	in 	std_logic_vector((PIXEL_SIZE-1) downto 0);
+        in_data         :	in 	std_logic_vector((BITWIDTH-1) downto 0);
         in_dv	        :	in	std_logic;
         in_fv	        :	in	std_logic;
         out_data        :	out	pixel_array (0 to (KERNEL_SIZE * KERNEL_SIZE)- 1);
@@ -71,7 +71,7 @@ architecture STRUCTURAL of firstLayer is
     --------------------------------------------------------------------------------
     component convElement
     generic (
-      PIXEL_SIZE   : integer;
+      BITWIDTH   : integer;
       KERNEL_SIZE  : integer;
       KERNEL_VALUE : pixel_array
     );
@@ -92,7 +92,7 @@ architecture STRUCTURAL of firstLayer is
 
     component sumElement_single
     generic(
-        PIXEL_SIZE      :   integer
+        BITWIDTH      :   integer
     );
 
     port(
@@ -102,8 +102,8 @@ architecture STRUCTURAL of firstLayer is
         in_data         :   in  std_logic_vector (SUM_WIDTH - 1 downto 0);
         in_dv           :   in  std_logic;
         in_fv           :   in  std_logic;
-        in_bias         :   in  std_logic_vector (PIXEL_SIZE - 1 downto 0);
-        out_data        :   out std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        in_bias         :   in  std_logic_vector (BITWIDTH - 1 downto 0);
+        out_data        :   out std_logic_vector (BITWIDTH - 1 downto 0);
         out_dv          :   out std_logic;
         out_fv          :   out std_logic
     );
@@ -131,7 +131,7 @@ architecture STRUCTURAL of firstLayer is
         -- Extract neighborhood
         NE_INST : neighExtractor
         generic map(
-            PIXEL_SIZE	 => PIXEL_SIZE,
+            BITWIDTH	 => BITWIDTH,
             IMAGE_WIDTH  => IMAGE_WIDTH,
             KERNEL_SIZE	 => KERNEL_SIZE
         )
@@ -158,7 +158,7 @@ architecture STRUCTURAL of firstLayer is
             -- Inst Conv Element
             CEs_inst : convElement
             generic map(
-                PIXEL_SIZE   => PIXEL_SIZE,
+                BITWIDTH   => BITWIDTH,
                 KERNEL_SIZE  => KERNEL_SIZE,
                 KERNEL_VALUE => extractRow(flowIndex,
                                              NB_OUT_FLOWS,
@@ -201,7 +201,7 @@ architecture STRUCTURAL of firstLayer is
         SEs_loop : for i in 0 to (NB_OUT_FLOWS - 1) generate
             SEs_inst : sumElement_single
             generic map (
-                PIXEL_SIZE   => PIXEL_SIZE
+                BITWIDTH   => BITWIDTH
             )
             port map(
                 clk          => clk,

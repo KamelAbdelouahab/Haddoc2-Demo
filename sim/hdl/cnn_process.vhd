@@ -10,7 +10,7 @@ use work.params.all;
 
 entity cnn_process is
     generic(
-        PIXEL_SIZE: integer := PIXEL_CONST;
+        BITWIDTH: integer := GENERAL_BITWIDTH;
         IMAGE_WIDTH: integer := CONV1_IMAGE_WIDTH
     );
     port(
@@ -18,10 +18,10 @@ entity cnn_process is
         reset_n: in std_logic;
         enable: in std_logic;
         select_i: in std_logic_vector(31 downto 0);
-        in_data: in std_logic_vector(PIXEL_SIZE-1 downto 0);
+        in_data: in std_logic_vector(BITWIDTH-1 downto 0);
         in_dv: in std_logic;
         in_fv: in std_logic;
-        out_data: out std_logic_vector(PIXEL_SIZE-1 downto 0);
+        out_data: out std_logic_vector(BITWIDTH-1 downto 0);
         out_dv: out std_logic;
         out_fv: out std_logic
     );
@@ -33,16 +33,16 @@ architecture STRUCTURAL of cnn_process is
 
   component to_signedPixel is
     generic(
-        PIXEL_SIZE: integer
+        BITWIDTH: integer
     );
     port(
         clk: in std_logic;
         reset_n: in std_logic;
         enable: in std_logic;
-        in_data: in std_logic_vector(0 to PIXEL_SIZE-1);
+        in_data: in std_logic_vector(0 to BITWIDTH-1);
         in_dv: in std_logic;
         in_fv: in std_logic;
-        out_data: out std_logic_vector(0 to PIXEL_SIZE-1);
+        out_data: out std_logic_vector(0 to BITWIDTH-1);
         out_dv: out std_logic;
         out_fv: out std_logic
     );
@@ -50,7 +50,7 @@ architecture STRUCTURAL of cnn_process is
 
   component firstLayer is
     generic(
-        PIXEL_SIZE: integer;
+        BITWIDTH: integer;
         IMAGE_WIDTH: integer;
         KERNEL_SIZE: integer;
         NB_OUT_FLOWS: integer;
@@ -62,7 +62,7 @@ architecture STRUCTURAL of cnn_process is
         clk: in std_logic;
         reset_n: in std_logic;
         enable: in std_logic;
-        in_data: in std_logic_vector(0 to PIXEL_SIZE-1);
+        in_data: in std_logic_vector(0 to BITWIDTH-1);
         in_dv: in std_logic;
         in_fv: in std_logic;
         out_data: out pixel_array(0 to NB_OUT_FLOWS-1);
@@ -73,7 +73,7 @@ architecture STRUCTURAL of cnn_process is
 
   component convLayer is
     generic(
-        PIXEL_SIZE: integer;
+        BITWIDTH: integer;
         IMAGE_WIDTH: integer;
         KERNEL_SIZE: integer;
         NB_IN_FLOWS: integer;
@@ -97,7 +97,7 @@ architecture STRUCTURAL of cnn_process is
 
   component poolLayer is
     generic(
-        PIXEL_SIZE: integer;
+        BITWIDTH: integer;
         IMAGE_WIDTH: integer;
         KERNEL_SIZE: integer;
         NB_OUT_FLOWS: integer
@@ -117,7 +117,7 @@ architecture STRUCTURAL of cnn_process is
 
   component fcLayer is
     generic(
-        PIXEL_SIZE: integer;
+        BITWIDTH: integer;
         IMAGE_WIDTH: integer;
         FEATURE_SIZE: integer;
         NB_IN_FLOWS: integer;
@@ -141,7 +141,7 @@ architecture STRUCTURAL of cnn_process is
 
   component display_mux is
     generic(
-        PIXEL_SIZE: integer;
+        BITWIDTH: integer;
         NB_IN_FLOWS: integer
     );
     port(
@@ -149,7 +149,7 @@ architecture STRUCTURAL of cnn_process is
         in_dv: in std_logic_vector(0 to NB_IN_FLOWS-1);
         in_fv: in std_logic_vector(0 to NB_IN_FLOWS-1);
         sel: in std_logic_vector(31 downto 0);
-        out_data: out std_logic_vector(PIXEL_SIZE-1 downto 0);
+        out_data: out std_logic_vector(BITWIDTH-1 downto 0);
         out_dv: out std_logic;
         out_fv: out std_logic
     );
@@ -157,7 +157,7 @@ architecture STRUCTURAL of cnn_process is
 
   -- SIGNALS
 
-  signal signed_data : std_logic_vector(0 to PIXEL_SIZE-1);
+  signal signed_data : std_logic_vector(0 to BITWIDTH-1);
   signal signed_dv : std_logic;
   signal signed_fv : std_logic;
 
@@ -183,7 +183,7 @@ architecture STRUCTURAL of cnn_process is
 begin
   spixel: to_signedPixel
     generic map(
-      PIXEL_SIZE => PIXEL_SIZE
+      BITWIDTH => BITWIDTH
     )
     port map(
       clk => clk,
@@ -199,7 +199,7 @@ begin
 
   conv1: firstLayer
     generic map(
-      PIXEL_SIZE => PIXEL_SIZE,
+      BITWIDTH => BITWIDTH,
       IMAGE_WIDTH => CONV1_IMAGE_WIDTH,
       KERNEL_SIZE => CONV1_KERNEL_SIZE,
       NB_OUT_FLOWS => CONV1_OUT_SIZE,
@@ -221,7 +221,7 @@ begin
 
   pool1: poolLayer
     generic map(
-      PIXEL_SIZE => PIXEL_SIZE,
+      BITWIDTH => BITWIDTH,
       IMAGE_WIDTH => POOL1_IMAGE_WIDTH,
       KERNEL_SIZE => POOL1_KERNEL_SIZE,
       NB_OUT_FLOWS => POOL1_OUT_SIZE
@@ -240,7 +240,7 @@ begin
 
   conv2: convLayer
     generic map(
-      PIXEL_SIZE => PIXEL_SIZE,
+      BITWIDTH => BITWIDTH,
       IMAGE_WIDTH => CONV2_IMAGE_WIDTH,
       KERNEL_SIZE => CONV2_KERNEL_SIZE,
       NB_IN_FLOWS => CONV2_IN_SIZE,
@@ -263,7 +263,7 @@ begin
 
   pool2: poolLayer
     generic map(
-      PIXEL_SIZE => PIXEL_SIZE,
+      BITWIDTH => BITWIDTH,
       IMAGE_WIDTH => POOL2_IMAGE_WIDTH,
       KERNEL_SIZE => POOL2_KERNEL_SIZE,
       NB_OUT_FLOWS => POOL2_OUT_SIZE
@@ -282,7 +282,7 @@ begin
 
   display_mux_inst: display_mux
     generic map(
-      PIXEL_SIZE => PIXEL_SIZE,
+      BITWIDTH => BITWIDTH,
       NB_IN_FLOWS => POOL2_OUT_SIZE
     )
     port map(

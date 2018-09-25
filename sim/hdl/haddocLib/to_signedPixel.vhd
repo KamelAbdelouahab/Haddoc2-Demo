@@ -8,17 +8,17 @@ library work;
 
 entity to_signedPixel is
     generic(
-        PIXEL_SIZE  :   integer
+        BITWIDTH  :   integer
     );
 
     port(
         clk         :   in  std_logic;
         reset_n     :   in  std_logic;
         enable      :   in  std_logic;
-        in_data     :   in  std_logic_vector(PIXEL_SIZE-1 downto 0);
+        in_data     :   in  std_logic_vector(BITWIDTH-1 downto 0);
         in_dv    	:   in  std_logic;
         in_fv    	:   in  std_logic;
-        out_data    :   out std_logic_vector(PIXEL_SIZE-1 downto 0);
+        out_data    :   out std_logic_vector(BITWIDTH-1 downto 0);
         out_dv    	:   out std_logic;
         out_fv    	:   out std_logic
 
@@ -33,7 +33,7 @@ architecture bhv of to_signedPixel is
             out_data <= (others=>'0');
         else
             if (enable = '1') then
-                out_data <= "0" & in_data(PIXEL_SIZE-1 downto 1);
+                out_data <= "0" & in_data(BITWIDTH-1 downto 1);
             end if;
         end if;
     out_dv <= in_dv;

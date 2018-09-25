@@ -39,7 +39,7 @@ library work;
 entity sumElement is
 
     generic(
-        PIXEL_SIZE      :   integer;
+        BITWIDTH      :   integer;
         NB_IN_FLOWS     :   integer
     );
 
@@ -51,9 +51,9 @@ entity sumElement is
         in_data         :   in  sum_array        (0 to NB_IN_FLOWS - 1);
         in_dv           :   in  std_logic_vector (0 to NB_IN_FLOWS - 1);
         in_fv           :   in  std_logic_vector (0 to NB_IN_FLOWS - 1);
-        in_bias         :   in  std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        in_bias         :   in  std_logic_vector (BITWIDTH - 1 downto 0);
 
-        out_data        :   out std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        out_data        :   out std_logic_vector (BITWIDTH - 1 downto 0);
         out_dv          :   out std_logic;
         out_fv          :   out std_logic
     );
@@ -72,7 +72,7 @@ architecture bhv of sumElement is
 
     signal  tmp1        :   signed (THIS_SUM_WIDTH-1 downto 0):= (others=>'0');
     signal  tmp2        :   signed (THIS_SUM_WIDTH-1 downto 0):= (others=>'0');
-    signal  s_bias      :   signed (2*PIXEL_SIZE  -1 downto 0):= (others=>'0');
+    signal  s_bias      :   signed (2*BITWIDTH  -1 downto 0):= (others=>'0');
 
     begin
     -- Cast Pixels in signed
@@ -111,18 +111,18 @@ architecture bhv of sumElement is
     --------------------------------------------------------------------------
     -- Apply Activation function : TanH (approx)
     --------------------------------------------------------------------------
-    -- out_data   <=   std_logic_vector(to_signed(LOWER_TANH_VALUE,PIXEL_SIZE))   when (sum_s < to_signed(LOWER_THRESHHOLD,THIS_SUM_WIDTH)) else
-    --                 std_logic_vector(to_signed(UPPER_TANH_VALUE,PIXEL_SIZE))   when (sum_s > to_signed(UPPER_THRESHHOLD,THIS_SUM_WIDTH)) else
-    --                 std_logic_vector(SHIFT_RIGHT(sum_s,PIXEL_SIZE)(PIXEL_SIZE-1 downto 0));
+    -- out_data   <=   std_logic_vector(to_signed(LOWER_TANH_VALUE,BITWIDTH))   when (sum_s < to_signed(LOWER_THRESHHOLD,THIS_SUM_WIDTH)) else
+    --                 std_logic_vector(to_signed(UPPER_TANH_VALUE,BITWIDTH))   when (sum_s > to_signed(UPPER_THRESHHOLD,THIS_SUM_WIDTH)) else
+    --                 std_logic_vector(SHIFT_RIGHT(sum_s,BITWIDTH)(BITWIDTH-1 downto 0));
 
-    tmp1       <=   (to_signed(-V1,PIXEL_SIZE) + SHIFT_RIGHT(sum_s,A2));
-    tmp2       <=   (to_signed( V1,PIXEL_SIZE) + SHIFT_RIGHT(sum_s,A2));
+    tmp1       <=   (to_signed(-V1,BITWIDTH) + SHIFT_RIGHT(sum_s,A2));
+    tmp2       <=   (to_signed( V1,BITWIDTH) + SHIFT_RIGHT(sum_s,A2));
 
-    out_data   <=   std_logic_vector( to_signed(-V2,PIXEL_SIZE))                        when ( sum_s <= to_signed(-T2,THIS_SUM_WIDTH)) else
-                    std_logic_vector(tmp1(PIXEL_SIZE-1 downto 0))                       when ((sum_s >  to_signed(-T2,THIS_SUM_WIDTH)) and (sum_s <  to_signed(-T1,THIS_SUM_WIDTH))) else
-                    std_logic_vector((SHIFT_RIGHT(sum_s,A1)(PIXEL_SIZE-1 downto 0)))    when ((sum_s >= to_signed(-T1,THIS_SUM_WIDTH)) and (sum_s <= to_signed( T1,THIS_SUM_WIDTH))) else
-                    std_logic_vector(tmp2(PIXEL_SIZE-1 downto 0))                       when ((sum_s >  to_signed( T1,THIS_SUM_WIDTH)) and (sum_s <= to_signed( T2,THIS_SUM_WIDTH))) else
-                    std_logic_vector( to_signed( V2,PIXEL_SIZE));
+    out_data   <=   std_logic_vector( to_signed(-V2,BITWIDTH))                        when ( sum_s <= to_signed(-T2,THIS_SUM_WIDTH)) else
+                    std_logic_vector(tmp1(BITWIDTH-1 downto 0))                       when ((sum_s >  to_signed(-T2,THIS_SUM_WIDTH)) and (sum_s <  to_signed(-T1,THIS_SUM_WIDTH))) else
+                    std_logic_vector((SHIFT_RIGHT(sum_s,A1)(BITWIDTH-1 downto 0)))    when ((sum_s >= to_signed(-T1,THIS_SUM_WIDTH)) and (sum_s <= to_signed( T1,THIS_SUM_WIDTH))) else
+                    std_logic_vector(tmp2(BITWIDTH-1 downto 0))                       when ((sum_s >  to_signed( T1,THIS_SUM_WIDTH)) and (sum_s <= to_signed( T2,THIS_SUM_WIDTH))) else
+                    std_logic_vector( to_signed( V2,BITWIDTH));
     --------------------------------------------------------------------------
 
 end bhv;

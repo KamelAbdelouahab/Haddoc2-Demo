@@ -27,7 +27,7 @@ library work;
 entity convElement is
 
     generic(
-        PIXEL_SIZE    :   integer;
+        BITWIDTH    :   integer;
         KERNEL_SIZE   :   integer;
         KERNEL_VALUE  :   pixel_array
     );
@@ -51,8 +51,8 @@ architecture bhv of convElement is
     --------------------------------------------------------------------------
     -- SIGNALS
     --------------------------------------------------------------------------
-    -- type   spa_ini is array ( integer range <> ) of signed (   PIXEL_SIZE-1 downto 0);
-    type   spa_mul is array ( integer range <> ) of std_logic_vector ( 2*PIXEL_SIZE-1 downto 0);
+    -- type   spa_ini is array ( integer range <> ) of signed (   BITWIDTH-1 downto 0);
+    type   spa_mul is array ( integer range <> ) of std_logic_vector ( 2*BITWIDTH-1 downto 0);
 
 
     -- signal s_data    : spa_ini (0 to KERNEL_SIZE * KERNEL_SIZE - 1) := (others=>(others=>'0'));

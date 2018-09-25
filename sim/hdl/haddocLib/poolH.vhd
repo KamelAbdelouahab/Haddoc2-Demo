@@ -7,7 +7,7 @@ library ieee;
 entity poolH is
 
     generic(
-        PIXEL_SIZE      :   integer;
+        BITWIDTH      :   integer;
         IMAGE_WIDTH     :   integer;
         KERNEL_SIZE     :   integer
     );
@@ -16,10 +16,10 @@ entity poolH is
         clk	            :	in 	std_logic;
         reset_n	        :	in	std_logic;
         enable          :   in  std_logic;
-        in_data         :   in  std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        in_data         :   in  std_logic_vector (BITWIDTH - 1 downto 0);
         in_dv           :   in  std_logic;
         in_fv           :   in  std_logic;
-        out_data        :   out std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        out_data        :   out std_logic_vector (BITWIDTH - 1 downto 0);
         out_dv          :   out std_logic;
         out_fv          :   out std_logic
     );
@@ -29,10 +29,10 @@ architecture rtl of poolH is
     --------------------------------------------------------------------------
     -- Signals
     --------------------------------------------------------------------------
-    type   buffer_data_type is array ( integer range <> ) of signed (PIXEL_SIZE-1 downto 0);
+    type   buffer_data_type is array ( integer range <> ) of signed (BITWIDTH-1 downto 0);
 
     signal buffer_data       : buffer_data_type (KERNEL_SIZE - 1 downto 0);
-    signal max_value_signal  : signed(PIXEL_SIZE-1 downto 0);
+    signal max_value_signal  : signed(BITWIDTH-1 downto 0);
     signal buffer_fv         : std_logic_vector(KERNEL_SIZE downto 0);
     signal delay_fv          : std_logic := '0';
     signal tmp_dv            : std_logic := '0';

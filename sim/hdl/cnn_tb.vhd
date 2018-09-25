@@ -19,7 +19,7 @@ architecture tb of cnn_tb is
     --------------------------------------------------------------------------------
     component cnn_process
     generic(
-        PIXEL_SIZE    :   integer ;
+        BITWIDTH    :   integer ;
         IMAGE_WIDTH   :   integer
     );
 
@@ -27,11 +27,11 @@ architecture tb of cnn_tb is
         clk	          : in  std_logic;
         reset_n	      : in  std_logic;
         enable        : in  std_logic;
-        in_data       : in  std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        in_data       : in  std_logic_vector (BITWIDTH - 1 downto 0);
         select_i      : in  std_logic_vector (31 downto 0);
         in_dv         : in  std_logic;
         in_fv         : in  std_logic;
-        out_data      : out std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        out_data      : out std_logic_vector (BITWIDTH - 1 downto 0);
         out_dv        : out std_logic;
         out_fv        : out std_logic
         );
@@ -40,18 +40,18 @@ architecture tb of cnn_tb is
     --------------------------------------------------------------------------------
     -- SIGNALS & CONSTANTS
     --------------------------------------------------------------------------------
-    constant CONST_PIXEL_SIZE    :   integer  := 8;
+    constant CONST_BITWIDTH    :   integer  := 8;
     constant CONST_IMAGE_WIDTH   :   integer  := 322;
     constant CLK_PROC_PERIOD     :   TIME     := 1 ns;
 
     signal   sig_clk_proc        :   std_logic;
     signal   sig_reset_n         :   std_logic;
     signal   sig_enable          :   std_logic;
-    signal   sig_in_data         :   std_logic_vector (CONST_PIXEL_SIZE - 1 downto 0);
+    signal   sig_in_data         :   std_logic_vector (CONST_BITWIDTH - 1 downto 0);
     signal   sig_select_i        :   std_logic_vector (31 downto 0);
     signal   sig_in_dv           :   std_logic;
     signal   sig_in_fv           :   std_logic;
-    signal   sig_out_data        :   std_logic_vector (CONST_PIXEL_SIZE - 1 downto 0);
+    signal   sig_out_data        :   std_logic_vector (CONST_BITWIDTH - 1 downto 0);
     signal   sig_out_dv          :   std_logic;
     signal   sig_out_fv          :   std_logic;
 
@@ -65,7 +65,7 @@ architecture tb of cnn_tb is
 		---------------------------------------------------------
         cut_inst :  cnn_process
         generic map (
-            PIXEL_SIZE    => CONST_PIXEL_SIZE,
+            BITWIDTH    => CONST_BITWIDTH,
             IMAGE_WIDTH   => CONST_IMAGE_WIDTH
         )
 
@@ -125,7 +125,7 @@ architecture tb of cnn_tb is
 
 		    	read(in_line, in_pixelFromFile, in_pixel_ok);
 		    	while in_pixel_ok loop
-		    		sig_in_data <= std_logic_vector(to_unsigned(in_pixelFromFile, CONST_PIXEL_SIZE));
+		    		sig_in_data <= std_logic_vector(to_unsigned(in_pixelFromFile, CONST_BITWIDTH));
 		    		wait for clk_proc_period;
 		    		read(in_line, in_pixelFromFile, in_pixel_ok);
 		    	end loop;

@@ -31,7 +31,7 @@ library work;
 
 entity fcLayer is
     generic(
-        PIXEL_SIZE    :   integer;
+        BITWIDTH    :   integer;
         IMAGE_WIDTH   :   integer;
         FEATURE_SIZE  :   integer;
         NB_IN_FLOWS   :   integer;
@@ -63,7 +63,7 @@ architecture STRUCTURAL of fcLayer is
     --------------------------------------------------------------------------------
     component neighExtractor
     generic(
-		PIXEL_SIZE      :   integer;
+		BITWIDTH      :   integer;
 		IMAGE_WIDTH     :   integer;
 		KERNEL_SIZE     :   integer
 	);
@@ -72,7 +72,7 @@ architecture STRUCTURAL of fcLayer is
 		clk	            :	in 	std_logic;
         reset_n	        :	in	std_logic;
         enable	        :	in	std_logic;
-        in_data         :	in 	std_logic_vector((PIXEL_SIZE-1) downto 0);
+        in_data         :	in 	std_logic_vector((BITWIDTH-1) downto 0);
         in_dv	        :	in	std_logic;
         in_fv	        :	in	std_logic;
         out_data        :	out	pixel_array (0 to (FEATURE_SIZE* KERNEL_SIZE)- 1);
@@ -85,7 +85,7 @@ architecture STRUCTURAL of fcLayer is
     component convElement
     generic(
         KERNEL_SIZE     :    integer;
-        PIXEL_SIZE      :    integer
+        BITWIDTH      :    integer
     );
 
     port(
@@ -107,7 +107,7 @@ architecture STRUCTURAL of fcLayer is
 
     component sumElement
     generic(
-        PIXEL_SIZE      :   integer;
+        BITWIDTH      :   integer;
         NB_IN_FLOWS     :   integer
     );
 
@@ -118,8 +118,8 @@ architecture STRUCTURAL of fcLayer is
         in_data         :   in  sum_array        (0 to NB_IN_FLOWS - 1);
         in_dv           :   in  std_logic_vector (0 to NB_IN_FLOWS - 1);
         in_fv           :   in  std_logic_vector (0 to NB_IN_FLOWS - 1);
-        in_bias         :   in  std_logic_vector (PIXEL_SIZE - 1 downto 0);
-        out_data        :   out std_logic_vector (PIXEL_SIZE - 1 downto 0);
+        in_bias         :   in  std_logic_vector (BITWIDTH - 1 downto 0);
+        out_data        :   out std_logic_vector (BITWIDTH - 1 downto 0);
         out_dv          :   out std_logic;
         out_fv          :   out std_logic
     );
@@ -154,7 +154,7 @@ architecture STRUCTURAL of fcLayer is
             NEs_loop : for i in 0 to (NB_IN_FLOWS - 1) generate
                 NEs_inst : neighExtractor
                 generic map(
-                    PIXEL_SIZE	 => PIXEL_SIZE,
+                    BITWIDTH	 => BITWIDTH,
                     IMAGE_WIDTH  => IMAGE_WIDTH,
                     KERNEL_SIZE	 => FEATURE_SIZE
                 )
@@ -184,7 +184,7 @@ architecture STRUCTURAL of fcLayer is
                 CEs_inst : convElement
                 generic map(
                     KERNEL_SIZE => FEATURE_SIZE,
-                    PIXEL_SIZE  => PIXEL_SIZE
+                    BITWIDTH  => BITWIDTH
                 )
                 port map(
                     clk         => clk,
@@ -214,7 +214,7 @@ architecture STRUCTURAL of fcLayer is
         SEs_loop : for i in 0 to (NB_OUT_FLOWS - 1) generate
             SEs_inst : sumElement
             generic map (
-                PIXEL_SIZE   => PIXEL_SIZE,
+                BITWIDTH   => BITWIDTH,
                 NB_IN_FLOWS  => NB_IN_FLOWS
             )
             port map(
