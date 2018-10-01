@@ -3,10 +3,10 @@ purge:
 hdl:
 	mkdir -p node/hdl
 	python3 $(HADDOC2_ROOT)/lib/haddoc2.py \
-	--proto=caffe/lenet_feat_ext.prototxt \
-	--model=caffe/lenet.caffemodel \
+	--proto=caffe/I4.prototxt \
+	--model=caffe/I4.caffemodel \
 	--out=node/hdl \
-	--nbits=5
+	--nbits=3
 proc:
 	mkdir -p node/hdl/haddocLib
 	cp $(HADDOC2_ROOT)/lib/hdl/* node/hdl/haddocLib
