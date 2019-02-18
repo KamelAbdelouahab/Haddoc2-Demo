@@ -12,11 +12,11 @@ entity cnn is
     IMAGE_WIDTH   : integer := 282;
     IN_SIZE       : integer := 8;
     OUT_SIZE      : integer := 8;
-    CLK_PROC_FREQ : integer := 50000000
+    clk     _FREQ : integer := 50000000
     );
 
   port (
-    clk_proc   : in  std_logic;
+    clk        : in  std_logic;
     reset_n    : in  std_logic;
     in_data    : in  std_logic_vector((IN_SIZE-1) downto 0);
     in_fv      : in  std_logic;
@@ -57,7 +57,7 @@ architecture rtl of cnn is
 
   component cnn_slave
     port(
-      clk_proc   : in  std_logic;
+      clk        : in  std_logic;
       reset_n    : in  std_logic;
       addr_rel_i : in  std_logic_vector(1 downto 0);
       wr_i       : in  std_logic;
@@ -82,7 +82,7 @@ architecture rtl of cnn is
 begin
   slave_inst : cnn_slave
     port map(
-      clk_proc   => clk_proc,
+      clk        => clk     ,
       reset_n    => reset_n,
       addr_rel_i => addr_rel_i,
       wr_i       => wr_i,
@@ -100,7 +100,7 @@ begin
       )
 
     port map (
-      clk      => clk_proc,
+      clk      => clk     ,
       reset_n  => reset_n,
       enable   => enable_s,
       in_data  => in_data,

@@ -42,9 +42,9 @@ architecture tb of cnn_tb is
     --------------------------------------------------------------------------------
     constant CONST_BITWIDTH    :   integer  := 8;
     constant CONST_IMAGE_WIDTH   :   integer  := 322;
-    constant CLK_PROC_PERIOD     :   TIME     := 1 ns;
+    constant clk     _PERIOD     :   TIME     := 1 ns;
 
-    signal   sig_clk_proc        :   std_logic;
+    signal   sig_clk             :   std_logic;
     signal   sig_reset_n         :   std_logic;
     signal   sig_enable          :   std_logic;
     signal   sig_in_data         :   std_logic_vector (CONST_BITWIDTH - 1 downto 0);
@@ -70,7 +70,7 @@ architecture tb of cnn_tb is
         )
 
         port map (
-            clk 	      => sig_clk_proc,
+            clk 	      => sig_clk     ,
             reset_n 	  => sig_reset_n,
             enable        => sig_enable,
             select_i      => sig_select_i,
@@ -89,10 +89,10 @@ architecture tb of cnn_tb is
         -- Clock
 		clk_stim : process
 			begin
-				sig_clk_proc <= '0';
-				wait for clk_proc_period / 2;
-				sig_clk_proc <= '1';
-				wait for clk_proc_period / 2;
+				sig_clk      <= '0';
+				wait for clk     _period / 2;
+				sig_clk      <= '1';
+				wait for clk     _period / 2;
                 if(endtb='1') then
                     wait;
                 end if;
@@ -115,7 +115,7 @@ architecture tb of cnn_tb is
            sig_in_fv <= '0';
            sig_in_data <= (others=>'0');
            sig_reset_n <= '0';
-           wait for clk_proc_period * 2;
+           wait for clk     _period * 2;
            sig_reset_n <= '1';
 
 		    sig_in_dv <= '1';
@@ -126,7 +126,7 @@ architecture tb of cnn_tb is
 		    	read(in_line, in_pixelFromFile, in_pixel_ok);
 		    	while in_pixel_ok loop
 		    		sig_in_data <= std_logic_vector(to_unsigned(in_pixelFromFile, CONST_BITWIDTH));
-		    		wait for clk_proc_period;
+		    		wait for clk     _period;
 		    		read(in_line, in_pixelFromFile, in_pixel_ok);
 		    	end loop;
 
@@ -154,7 +154,7 @@ architecture tb of cnn_tb is
 
         wait until sig_out_fv = '1';
 		while sig_out_fv='1' loop
-			wait until sig_clk_proc='1';
+			wait until sig_clk     ='1';
 				if(sig_out_dv='1') then
 					write(out_line, to_integer(unsigned(sig_out_data)));
 					write(out_line, string'(" "));
